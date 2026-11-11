@@ -8,11 +8,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kg.iuca.campuscardlab.ui.theme.CampusCardLabTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,12 +55,6 @@ fun CampusCard(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //EXERCISE 5
-        ProfileHeader(
-            name = "Amal Asanbekov",
-            status = "In class · Building B"
-        )
-
         Spacer(modifier = Modifier.height(24.dp))
 
         //Schedule
@@ -67,14 +65,10 @@ fun CampusCard(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        //EXERCISE 5
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ScheduleRow(time = "09:00", title = "CS101 Intro", room = "Lab 3")
-            ScheduleRow(time = "11:00", title = "MATH210", room = "A-204")
-            ScheduleRow(time = "14:00", title = "Soft Skills", room = "Hall 1")
-        }
+
+        Greeting(
+            words = listOf("ANDROID", "KOTLIN", "COMPOSE", "LAYOUT")
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -93,42 +87,62 @@ fun CampusCard(modifier: Modifier = Modifier) {
     }
 }
 
-// EXERCISE 5
 @Composable
-fun ProfileHeader(name: String, status: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-        )
-        Column {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = status,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-    }
-}
-
-@Composable
-fun ScheduleRow(time: String, title: String, room: String, modifier: Modifier = Modifier) {
-    Row(
+fun Greeting(words: List<String>, modifier: Modifier = Modifier) {
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = time)
-        Text(text = title)
-        Text(text = room)
+        words.forEachIndexed { rowIndex, word ->
+            val isEvenRow = (rowIndex + 1) % 2 == 0
+
+            val rowBackgroundColor = if (isEvenRow) {
+                Color.LightGray
+            } else {
+                MaterialTheme.colorScheme.primaryContainer
+            }
+
+            val highlightedIndices = remember(rowIndex, word) {
+                if (isEvenRow) {
+                    val countToHighlight = Random.nextInt(1, (word.length / 2).coerceAtLeast(2))
+                    List(word.length) { it }.shuffled().take(countToHighlight).toSet()
+                } else {
+                    emptySet()
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(rowBackgroundColor)
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                word.forEachIndexed { letterIndex, char ->
+                    val boxColor = if (isEvenRow && highlightedIndices.contains(letterIndex)) {
+                        Color.Yellow
+                    } else if (isEvenRow) {
+                        Color.Transparent
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(boxColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = char.toString(),
+                            fontSize = 16.sp,
+                            color = if (boxColor == Color.Yellow) Color.Black else Color.White
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
